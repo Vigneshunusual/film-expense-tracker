@@ -18,3 +18,13 @@ media/
 # Environment / IDE
 .env
 .vscode/
+
+
+
+# Frontend - Node
+frontend/node_modules/
+frontend/dist/
+
+# Frontend environment variables
+frontend/.env
+frontend/.env.local
