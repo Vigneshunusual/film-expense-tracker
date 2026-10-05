@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import RegisterView, LoginView, RefreshTokenView, LogoutView, CurrentOrganizationView, TenantIsolationTestView
+from .views import RegisterView, LoginView, RefreshTokenView, LogoutView, CurrentOrganizationView,CurrentUserView,CSRFTokenView
 
 
 urlpatterns = [
@@ -11,6 +11,8 @@ urlpatterns = [
     path('refresh/', RefreshTokenView.as_view(), name='refresh'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('organization/',CurrentOrganizationView.as_view(),name='current-organization'),
+    path('me/', CurrentUserView.as_view(), name='current-user'),
+    path('csrf/', CSRFTokenView.as_view(), name='csrf-token'),
 
     #fortetsing only
     # path('tenant-test/',TenantIsolationTestView.as_view(),name='tenant-test'),

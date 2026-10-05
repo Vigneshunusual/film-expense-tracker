@@ -1,10 +1,29 @@
-import { Button } from "@/components/ui/button"
+
+import {Route,Routes} from "react-router-dom"; 
+
+import Register from "./pages/Register";
+import Login from"./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute"
+import Dashboard from "./pages/Dashboard";
+
+
 
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Button>Test Button</Button>
-    </div>
+    
+    <Routes>
+
+      {/* Public Routes */}
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
+
+    </Routes>
+    
   )
 }
 

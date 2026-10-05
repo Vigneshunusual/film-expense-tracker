@@ -92,7 +92,8 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
+    def validate(self, attrs):   #attrs contains the data submitted by the frontend.
+           #attrs = {"email": "vignesh@gmail.com","password": "mypassword"}
         email = attrs.get("email")
         password = attrs.get("password")
 
@@ -112,7 +113,8 @@ class LoginSerializer(serializers.Serializer):
                 "This account is inactive."
             )
 
-        attrs["user"] = user
+        attrs["user"] = user   #adds a new key called user:
+                    #attrs = {"email": "vignesh@gmail.com","password": "mypassword","user": <User object>}
 
         return attrs
 
