@@ -12,8 +12,6 @@ class User(AbstractUser):
         return self.email
 
 
-
-
 class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)   #OGC
     created_at = models.DateTimeField(auto_now_add=True)
@@ -32,11 +30,8 @@ class OrganizationMembership(models.Model):
         MEMBER = 'MEMBER', 'Member'
 
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='organization_memberships')
-
     organization = models.ForeignKey(Organization,on_delete=models.CASCADE,related_name='memberships')
-
     role = models.CharField(max_length=20,choices=Role.choices,default=Role.MEMBER)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -51,4 +46,4 @@ class OrganizationMembership(models.Model):
         return f'{self.user.email} - {self.organization.name} - {self.role}'
 
 
-#user --> organisation --> organisation Membership:owner or member or admin 
+#user -->organisation Membership-> organisation --> :owner or member or admin 

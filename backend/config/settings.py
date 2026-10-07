@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'accounts',
+    'productions',
     'rest_framework_simplejwt.token_blacklist',  #JWT access tokens are stateless. Simply logging out on the React side doesn't invalidate an already-issued token.
 ]
 
