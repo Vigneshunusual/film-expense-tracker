@@ -13,7 +13,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 #Imports our two models.
-from .models import Organization, OrganizationMembership
+from .models import Organization, OrganizationMembership,OrganizationInvitation
 
 #Stores our custom User model in User.
 User = get_user_model()
@@ -139,3 +139,45 @@ class CurrentOrganizationSerializer(serializers.ModelSerializer):
             'organization_name',
             'role',
         ]
+
+class OrganizationInvitationSerializer(serializers.ModelSerializer):  #Nishor(owner) is sending an invitaion link:
+
+    class Meta:
+        model = OrganizationInvitation
+        fields = ['id','email','first_name','last_name','role','status','expires_at','created_at',]
+        read_only_fields = ['id','status','expires_at','created_at',]
+
+    def validate_role(self, value):
+        if value == OrganizationMembership.Role.OWNER:
+            raise serializers.ValidationError("OWNER cannot be assigned through an invitation.")
+        return value
+
+
+#This serializer is used when the invited staff member accepts the invitation and creates their account. 
+    #Check that the information the user(vignesh) submitted is valid before we create his account.
+class AcceptOrganizationInvitationSerializer(serializers.Serializer):
+
+    first_name = serializers.CharField(max_length=150)  #The invited person enters their first name.
+    last_name = serializers.CharField(max_length=150,required=False, allow_blank=True)    #Last name is optional.
+    password = serializers.CharField(write_only=True,validators=[validate_password])  #validate_password applies Django's password rules, such as minimum length/common-password checks.
+    password_confirm = serializers.CharField(write_only=True)   #The user enters the password again to make sure there wasn't a typing mistake.
+
+    #we still keep validate() in the serializer because the backend must independently verify the passwords before creating the account.
+    def validate(self, attrs):    #The frontend can be bypassed. Backend validation cannot be skipped.
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError(
+                {
+                    "password_confirm": "Passwords do not match."
+                }
+            )
+
+        return attrs
+
+
+#This serializer is specifically for showing invitation information to the invited person.
+class OrganizationInvitationDetailSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source='organization.name',read_only=True)  #OGC
+    class Meta:  #This serializer is based on the OrganizationInvitation model.
+        model = OrganizationInvitation
+        fields = ['email','first_name','last_name','organization_name','role','status','expires_at',]
+        read_only_fields = fields

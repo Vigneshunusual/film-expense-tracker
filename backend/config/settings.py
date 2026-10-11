@@ -163,3 +163,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #add the Custom User setting
 AUTH_USER_MODEL = 'accounts.User'
+
+#Configure Django Email  : For development, we'll use Django's console email backend.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

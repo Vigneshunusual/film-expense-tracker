@@ -47,3 +47,29 @@ class OrganizationMembership(models.Model):
 
 
 #user -->organisation Membership-> organisation --> :owner or member or admin 
+
+
+
+
+import uuid
+class OrganizationInvitation(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        ACCEPTED = 'ACCEPTED', 'Accepted'
+        EXPIRED = 'EXPIRED', 'Expired'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
+    organization = models.ForeignKey(Organization,on_delete=models.CASCADE,related_name='invitations')   #Which organization is inviting the person.   OGC Films=> Invitation to  → arun@gmail.com
+    email = models.EmailField()
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150,blank=True)
+    token = models.UUIDField(default=uuid.uuid4,unique=True,editable=False)  #This is the unique invitation identifier.
+    role = models.CharField(max_length=20,choices=OrganizationMembership.Role.choices,default=OrganizationMembership.Role.MEMBER)   #When Nishok invites someone, he can specify their organization role.
+    status = models.CharField(max_length=20,choices=Status.choices,default=Status.PENDING)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True,blank=True)
+
+    def __str__(self):
+        return f'{self.email} - {self.organization.name} - {self.status}'

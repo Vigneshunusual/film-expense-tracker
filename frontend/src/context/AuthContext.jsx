@@ -17,8 +17,8 @@ import { useLocation } from "react-router-dom"
 
 const AuthContext = createContext(null)  // cretae context() is a place to store the shared data. We will store the authentication state here.
            //AuthContext->Stores login information->Available to the whole React app
-export const AuthProvider = ({ children }) => {
 
+export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null)    //Stores the logged-in user's information.
   const [loading, setLoading] = useState(true)
@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
     const publicRoutes = ["/login", "/register"]
 
     // Check whether current page is public
-    const isPublicRoute = publicRoutes.includes(currentPath)   //Is the current URL present inside publicRoutes?
+    const isPublicRoute = publicRoutes.includes(currentPath)  || currentPath.startsWith("/invitations/") //Is the current URL present inside publicRoutes?
+      
 
     //Why do CSRF first?
           //Because we want the browser to already have the CSRF cookie before React starts making future POST/PUT/PATCH/DELETE requests.
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
         // Public pages don't need authentication check
         if (isPublicRoute) {
-            return
+            return  //continue
         }
 
         const data = await getCurrentUser()   //it calls GET /api/auth/me/
