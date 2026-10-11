@@ -24,6 +24,7 @@ from django.middleware.csrf import get_token    #can generate/get a CSRF token.
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import ensure_csrf_cookie
+from .email_service import send_organization_invitation_email  #for an email
 
 @method_decorator(csrf_protect, name='dispatch') #csrf_protect is a Django function decorator
 class RegisterView(APIView):
@@ -319,7 +320,8 @@ class CreateOrganizationInvitationView(APIView):
 
            # 7. Create the invitation with a seven-day expiry
         invitation = serializer.save(organization=membership.organization,expires_at=timezone.now() + timedelta(days=7))  #Nishok does not send:organization adn expiry at. The backend automatically adds them.  
-
+        send_organization_invitation_email(invitation)
+        
         return Response(
             {
                 "message": "Invitation created successfully.",

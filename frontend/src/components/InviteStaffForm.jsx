@@ -13,6 +13,7 @@ function InviteStaffForm() {
     //Both initially contain an empty string, so neither message appears.
     const [successMessage, setSuccessMessage] = useState("")   //displays a success message after invitation creation.
     const [errorMessage, setErrorMessage] = useState("")   //displays an error if creation fails.
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleChange = (event) => {   //event — the input change event.
         const { name, value } = event.target    //event.target — the input or dropdown that changed.
@@ -27,11 +28,17 @@ function InviteStaffForm() {
     {
         event.preventDefault()   //Prevents the browser's default form submission and page reload.
 
+        // Prevent overlapping submissions.
+        if (isSubmitting) {
+            return
+        }
+        setIsSubmitting(true)
         //Clears any previous success or error message before trying again.
         setSuccessMessage("")
         setErrorMessage("")
         //Send the API request:
         try {
+            console.log("INVITATION SUBMISSION", Date.now())
             const invitation = await createInvitation(formData)   //form data is our data whch will be send to backend.(sends the form values to the backend.) and stores the returned response data in our invitation variable.
             console.log("Invitation created successfully:", invitation)
             setSuccessMessage(`Invitation created for ${invitation.email}.`)  //Invitation created for arun@gmail.com.
@@ -54,6 +61,10 @@ function InviteStaffForm() {
                 responseData?.first_name?.[0] ||
                 "Failed to create invitation. Please try again."
             setErrorMessage(message)
+        }
+        finally 
+        {
+            setIsSubmitting(false)
         }
     }
 
@@ -170,10 +181,11 @@ function InviteStaffForm() {
 
             {/* Submit Button */}
             <button
-                type="submit"   //type="submit" — submits the form and triggers handleSubmit.
-                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-                Create Invitation
+                {isSubmitting ? "Creating Invitation..." : "Create Invitation"}
             </button>
         </form>
     </div>
