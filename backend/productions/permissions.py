@@ -13,6 +13,7 @@ class CanAccessProduction(BasePermission):   #“Can this user access this Produ
         if membership.role in [
             OrganizationMembership.Role.OWNER, 
             OrganizationMembership.Role.ACCOUNTANT,
+            OrganizationMembership.Role.MANAGER,
         ]:   
             return True
 
@@ -37,4 +38,19 @@ class CanArchiveProduction(BasePermission):  #“Is the currently logged-in user
     def has_permission(self, request, view):
         membership = request.user.organization_memberships
 
+        return membership.role == "OWNER"
+
+class CanEditProduction(BasePermission):
+
+    def has_permission(self, request, view):
+        membership = request.user.organization_memberships
+
+        return membership.role in [
+            OrganizationMembership.Role.OWNER,
+            OrganizationMembership.Role.MANAGER,
+        ]
+
+class CanRestoreProduction(BasePermission):
+    def has_permission(self, request, view):
+        membership = request.user.organization_memberships
         return membership.role == "OWNER"

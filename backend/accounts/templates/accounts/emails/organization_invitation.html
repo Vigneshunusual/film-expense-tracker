@@ -3,45 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Film Tracker Invitation</title>
+    <title>Organization Invitation</title>
 </head>
 
 <body style="margin:0; padding:0; background-color:#f4f6fa; font-family:Arial,Helvetica,sans-serif; color:#1f2937;">
 
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
-           style="background-color:#f4f6fa; padding:40px 16px;">
+    <table
+        role="presentation"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+        style="background-color:#f4f6fa; padding:40px 16px;"
+    >
         <tr>
             <td align="center">
 
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
-                       style="max-width:560px;">
+                <table
+                    role="presentation"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+                    style="max-width:720px;"
+                >
 
-                    <!-- Branding -->
+                    <!-- Organization Branding -->
                     <tr>
-                        <td align="center" style="padding-bottom:28px;">
-                            <div style="font-size:28px; font-weight:bold; letter-spacing:-1px; color:#172554;">
-                                FILM TRACKER
+                        <td align="center" style="padding-bottom:36px;">
+
+                            <div
+                                style="font-size:34px; font-weight:bold; letter-spacing:-1px; color:#172554;"
+                            >
+                                {{ invitation.organization.name|upper }}
                             </div>
 
-                            <div style="margin-top:6px; font-size:12px; letter-spacing:2px; color:#64748b;">
+                            <div
+                                style="margin-top:10px; font-size:14px; letter-spacing:3px; color:#64748b;"
+                            >
                                 FILM PRODUCTION MANAGEMENT
                             </div>
+
                         </td>
                     </tr>
 
                     <!-- Invitation Card -->
                     <tr>
-                        <td style="background-color:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:40px 32px;">
+                        <td
+                            style="background-color:#ffffff; border:1px solid #e5e7eb; border-radius:18px; padding:48px 36px;"
+                        >
 
-                            <h1 style="margin:0 0 24px; text-align:center; font-size:26px; line-height:1.4; color:#1e293b;">
-                                You're invited to join Film Tracker
+                            <!-- Dynamic Heading -->
+                            <h1
+                                style="margin:0 0 32px; text-align:center; font-size:30px; line-height:1.4; color:#172554;"
+                            >
+                                You're invited to join {{ invitation.organization.name }}
                             </h1>
 
-                            <p style="font-size:16px; line-height:1.7; color:#475569;">
+                            <!-- Greeting -->
+                            <p
+                                style="margin:0 0 24px; font-size:18px; line-height:1.7; color:#475569;"
+                            >
                                 Hello {{ invitation.first_name }},
                             </p>
 
-                            <p style="margin:0 0 24px; text-align:center; font-size:16px; line-height:1.8; color:#64748b;">
+                            <!-- Invitation Message -->
+                            <p
+                                style="margin:0 0 28px; text-align:center; font-size:18px; line-height:1.9; color:#64748b;"
+                            >
                                 You've been invited to join
                                 <strong style="color:#334155;">
                                     {{ invitation.organization.name }}
@@ -49,7 +76,10 @@
                                 and collaborate with your team.
                             </p>
 
-                            <p style="margin:0 0 28px; text-align:center; font-size:14px; color:#64748b;">
+                            <!-- Assigned Role -->
+                            <p
+                                style="margin:0 0 36px; text-align:center; font-size:16px; line-height:1.7; color:#64748b;"
+                            >
                                 Your assigned role:
                                 <strong style="color:#334155;">
                                     {{ invitation.get_role_display }}
@@ -57,23 +87,40 @@
                             </p>
 
                             <!-- Join Button -->
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                            <table
+                                role="presentation"
+                                width="100%"
+                                cellspacing="0"
+                                cellpadding="0"
+                            >
                                 <tr>
                                     <td align="center">
-                                        <a href="{{ invitation_url }}"
-                                           style="display:block; padding:16px 20px; background-color:#1d4ed8; border-radius:6px; color:#ffffff; font-size:16px; font-weight:bold; text-align:center; text-decoration:none;">
+
+                                        <a
+                                            href="{{ invitation_url }}"
+                                            style="display:block; padding:18px 20px; background-color:#214ed8; border-radius:7px; color:#ffffff; font-size:18px; font-weight:bold; text-align:center; text-decoration:none;"
+                                        >
                                             Join your team
                                         </a>
+
                                     </td>
                                 </tr>
                             </table>
 
-                            <p style="margin:28px 0 8px; text-align:center; font-size:13px; line-height:1.6; color:#94a3b8;">
-                                This invitation expires on {{ invitation.expires_at|date:"d M Y, h:i A" }}.
+                            <!-- Invitation Expiration -->
+                            <p
+                                style="margin:32px 0 12px; text-align:center; font-size:14px; line-height:1.7; color:#94a3b8;"
+                            >
+                                This invitation expires on
+                                {{ invitation.expires_at|date:"d M Y, h:i A" }}.
                             </p>
 
-                            <p style="margin:0; text-align:center; font-size:13px; line-height:1.6; color:#94a3b8;">
-                                If you weren't expecting this invitation, you can safely ignore this email.
+                            <!-- Security Notice -->
+                            <p
+                                style="margin:0; text-align:center; font-size:14px; line-height:1.7; color:#94a3b8;"
+                            >
+                                If you weren't expecting this invitation,
+                                you can safely ignore this email.
                             </p>
 
                         </td>
@@ -81,9 +128,17 @@
 
                     <!-- Footer -->
                     <tr>
-                        <td align="center" style="padding-top:24px; font-size:13px; line-height:1.7; color:#94a3b8;">
-                            <p style="margin:0;">Powered by Film Tracker</p>
-                            <p style="margin:4px 0 0;">Film production expense management</p>
+                        <td
+                            align="center"
+                            style="padding-top:28px; font-size:13px; line-height:1.8; color:#94a3b8;"
+                        >
+                            <p style="margin:0;">
+                                Powered by Film Tracker
+                            </p>
+
+                            <p style="margin:4px 0 0;">
+                                Film production expense management
+                            </p>
                         </td>
                     </tr>
 

@@ -18,6 +18,9 @@ function InviteStaffForm() {
     const handleChange = (event) => {   //event — the input change event.
         const { name, value } = event.target    //event.target — the input or dropdown that changed.
              //name — its name attribute. and  value — its current value.
+        // Hide previous messages when the user starts a new invitation.
+        setSuccessMessage("")
+        setErrorMessage("")
         setFormData((previousData) => ({   //the previous form state.
             ...previousData,   //preserves all existing fields.
             [name]: value,  //updates only the field that changed.
