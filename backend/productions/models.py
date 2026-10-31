@@ -42,7 +42,7 @@ class ProductionMembership(models.Model):
     class Role(models.TextChoices):
         DIRECTOR = "DIRECTOR", "Director"
         PRODUCTION_MANAGER = "PRODUCTION_MANAGER", "Production Manager"
-        STAFF = "STAFF", "Staff"
+        STAFF = "STAFF", "Staff"    
 
     user = models.ForeignKey("accounts.User",on_delete=models.CASCADE,related_name="production_memberships",)
                                 #acc.user=>It is a string reference to the model. Django can resolve it without requiring a direct import of the User model in this file.

@@ -63,16 +63,8 @@ class ProductionDetailView(generics.RetrieveUpdateAPIView):  #GET,PUT,PATCh
     serializer_class = ProductionSerializer  #DRF uses ProductionSerializer to validate incoming update data and convert the production object into JSON for the response.
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH"]:
-            return [
-                IsAuthenticated(),
-                CanAccessProduction(),
-                CanEditProduction(),
-            ]
-
-        return [
-            IsAuthenticated(),
-            CanAccessProduction(),
-        ]
+            return [IsAuthenticated(),CanAccessProduction(),CanEditProduction(),]
+        return [IsAuthenticated(),CanAccessProduction(),]
 
     
     def get_queryset(self):   #retrive, update
