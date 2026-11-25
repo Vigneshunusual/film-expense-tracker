@@ -18,6 +18,45 @@ class ProductionSerializer(serializers.ModelSerializer):  #serializers.ModelSeri
         fields = ["id","name","code","status","start_date","end_date","created_at","updated_at",]
         read_only_fields = ["id","created_at","updated_at",]
 
+
+
+        # Validates the production code before saving.
+    # Each production code must be unique within its organization.
+    def validate_code(self, value):
+
+        # Get the logged-in user's organization during creation.
+        # During updates, use the organization of the existing production.
+        if self.instance:
+            organization = self.instance.organization
+        else:
+            request = self.context.get("request")
+
+            if not request:
+                return value
+
+            organization = (
+                request.user.organization_memberships.organization
+            )
+
+        # Check whether this code already exists in this organization.
+        existing_production = Production.objects.filter(
+            organization=organization,
+            code=value
+        )
+
+        # During updates, exclude the current production itself.
+        if self.instance:
+            existing_production = existing_production.exclude(
+                pk=self.instance.pk
+            )
+
+        if existing_production.exists():
+            raise serializers.ValidationError(
+                "A production with this code already exists in this organization's productions."
+            )
+
+        return value
+
    #Runs custom validation for the whole serializer.
                 #attrs is a dictionary containing the incoming fields after DRF has performed its basic field validation and conversion.
     def validate(self, attrs):   #attrs is a dictionary containing the validated input data sent by the frontend.
@@ -101,11 +140,17 @@ class ProductionMembershipSerializer(serializers.ModelSerializer):
 
 
     def validate(self, attrs):
-        # Get the production and selected user.
         production = self.context["production"]
-        user = attrs["user"] 
 
-        # Check whether the user is already assigned to this production.
+    # Archived productions cannot receive new members.
+        if production.status == Production.Status.ARCHIVED:
+            raise serializers.ValidationError(
+                "Cannot assign members to an archived production."
+        )
+
+        user = attrs["user"]
+
+    # Check whether the user is already assigned.
         already_assigned = ProductionMembership.objects.filter(
             production=production,
             user=user,
@@ -113,7 +158,7 @@ class ProductionMembershipSerializer(serializers.ModelSerializer):
 
         if already_assigned:
             raise serializers.ValidationError({
-                "user": "This user is already assigned to this production."
-            })
+            "user": "This user is already assigned to this production."
+        })
 
         return attrs

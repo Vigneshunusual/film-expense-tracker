@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated  #logged-in users can access these APIs.
 
@@ -10,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
 #OrganizationMembership tells us which organization the user belongs to. 
 #ProductionMembership tells us which productions that user is assigned to.
@@ -93,9 +95,10 @@ class ProductionArchiveView(APIView):
     permission_classes = [IsAuthenticated,CanArchiveProduction,]  #So only an authenticated Owner can archive.
 
     def post(self, request, pk):   # this handles :POST /api/productions/1/archive/
-        production = Production.objects.get(    #Find production 1, but only if it belongs to the logged-in user's organization
-            pk=pk,     #Vignesh=> oGC => Find Production ID 1 belonging to OGC Films 
-            organization=request.user.organization_memberships.organization
+        production = get_object_or_404(
+            Production,
+            pk=pk,
+        organization=request.user.organization_memberships.organization,
         )
 
         production.status = "ARCHIVED"  #we're changing status from active to archrived. SO The database record remains
@@ -156,16 +159,19 @@ class ProductionMembershipCreateView(generics.CreateAPIView):  #Receive data →
         return context
 
     #CreateAPIView automatically does:req->serializer validation->perform_create(serializer)->save.So we customize perform_create() to control which production the membership belongs to.
-    def perform_create(self, serializer):   #a method you override to customize how the object is saved. 
+    def perform_create(self, serializer):
 
-        # Retrieve the production from the serializer context.
+    # Retrieve the production from the serializer context.
         production = serializer.context["production"]
 
-        
+    # Archived productions cannot receive new members.
+        if production.status == Production.Status.ARCHIVED:
+            raise ValidationError(
+            "Cannot assign members to an archived production."
+        )
 
-        ##Create a membership record for nishok, give him the Director role, and link that record to Film ABC.
-        serializer.save(production=production)  #production=production tells Django which production to attach to the new assignment.
-                                            #Django found Film ABC and stored it in the variable production.
+    ##Create a membership record for nishok, give him the Director role, and link that record to Film ABC.
+        serializer.save(production=production)
 
 # internall CreatAPIView   just for understand purpose:
 # def create(self, request, *args, **kwargs):  #DRF's built-in method that manages the overall creation process.
