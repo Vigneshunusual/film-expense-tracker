@@ -6,6 +6,8 @@ import AcceptInvitation from "./pages/AcceptInvitation"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Dashboard from "./pages/Dashboard"
 import DashboardLayout from "./layouts/DashboardLayout"
+import ProductionList from "./pages/productions/ProductionList"
+import ProductionDetails from "./pages/productions/ProductionDetails"
 
 function App() {
 return ( 
@@ -21,11 +23,12 @@ return (
     {/* Shared Dashboard Layout */}
     <Route element={<DashboardLayout />}>
       <Route path="/dashboard" element={<Dashboard />} />
+      {/* Production Management */}
+      <Route path="/productions" element={<ProductionList />} />
+      <Route path="/productions/:id" element={<ProductionDetails />} />
     </Route>
   </Route>
 </Routes>
-
-
 )
 }
 

@@ -1,19 +1,30 @@
 import { Navigate, Outlet } from "react-router-dom"
+import { RefreshCw } from "lucide-react"
+
 import { useAuth } from "../context/AuthContext"
 
-
-//ProtectedRoute is used to prevent unauthenticated users from accessing protected pages like Dashboard.
 function ProtectedRoute() {
-  const { isAuthenticated,loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
 
-  if (loading) {   //This prevents React from incorrectly redirecting a logged-in user to /login while /me is still being checked.
-    return <div>Loading...</div>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <RefreshCw size={28} className="animate-spin text-primary" />
+
+          <p className="text-sm text-muted-foreground">
+            Checking authentication...
+          </p>
+        </div>
+      </div>
+    )
   }
+
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />   //If the user is not authenticated, redirect to the login page.
+    return <Navigate to="/login" replace />
   }
 
-  return <Outlet />   //"Outlet means: Render the child route here if the user is authenticated."  (which means Dashboard)
+  return <Outlet />
 }
 
 export default ProtectedRoute

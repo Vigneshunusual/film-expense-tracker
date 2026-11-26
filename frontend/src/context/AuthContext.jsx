@@ -8,97 +8,144 @@
         //- Logout
     //we keep all of that in one place: AuthContext.
 
-
-import { createContext, useContext, useState } from "react"
-import { useEffect } from "react"
-import { getCurrentUser,getCSRFToken } from "../services/authService"  //Sends a request to Django to get the currently logged-in user's information. 
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router-dom"
 
+import {getCurrentUser,getCurrentOrganization,getCSRFToken,} from "../services/authService"
 
-const AuthContext = createContext(null)  // cretae context() is a place to store the shared data. We will store the authentication state here.
-           //AuthContext->Stores login information->Available to the whole React app
+const AuthContext = createContext(null)
+
+// Prevent duplicate simultaneous initialization requests in development.
+let authInitializationPromise = null
+
+const initializeAuthRequest = async (isPublicRoute) => {
+  if (!authInitializationPromise) {
+    authInitializationPromise = (async () => {
+      await getCSRFToken()
+
+      // Public pages do not require authentication restoration.
+      if (isPublicRoute) {
+        return {
+          user: null,
+          organization: null,
+        }
+      }
+
+      // Restore authenticated user.
+      const userData = await getCurrentUser()
+
+      let organizationData = null
+
+      // Fetch organization and role.
+      try {
+        organizationData = await getCurrentOrganization()
+      } catch (error) {
+        console.error("Unable to fetch organization:", error)
+      }
+
+      return {
+        user: userData,
+        organization: organizationData,
+      }
+    })().finally(() => {
+      authInitializationPromise = null
+    })
+  }
+
+  return authInitializationPromise
+}
 
 export const AuthProvider = ({ children }) => {
-
-  const [user, setUser] = useState(null)    //Stores the logged-in user's information.
+  const [user, setUser] = useState(null)
+  const [organization, setOrganization] = useState(null)
   const [loading, setLoading] = useState(true)
-  const location = useLocation()  //Get the current URL path. We will use this to determine whether we are on a public page or a protected page.
 
-  // Restore logged-in user when the app starts
-  useEffect(() => {  //Run this code when the component starts."
+  const location = useLocation()
 
-    // /login and /login/ are treated the same
-    const currentPath = location.pathname.replace(/\/$/, "")    //Take the current URL path and remove the / if it is at the very end.
-    const publicRoutes = ["/login", "/register"]
+  // Remember the initial route. Navigation should not reinitialize authentication.
+  const initialPath = useRef(location.pathname)
 
-    // Check whether current page is public
-    const isPublicRoute = publicRoutes.includes(currentPath)  || currentPath.startsWith("/invitations/") //Is the current URL present inside publicRoutes?
-      
+  useEffect(() => {
+    let isActive = true
 
-    //Why do CSRF first?
-          //Because we want the browser to already have the CSRF cookie before React starts making future POST/PUT/PATCH/DELETE requests.
     const initializeAuth = async () => {
+      const currentPath = initialPath.current.replace(/\/$/, "")
+
+      const publicRoutes = ["/login", "/register"]
+
+      const isPublicRoute =
+        publicRoutes.includes(currentPath) ||
+        currentPath.startsWith("/invitations/")
+
       try {
-        // Always make sure CSRF cookie exists
-        // Get the CSRF cookie from Django.
-        // This ensures the browser has a CSRF token before any
-        // POST, PUT, PATCH, or DELETE request.
-        await getCSRFToken()  
+        const authData = await initializeAuthRequest(isPublicRoute)
 
-        // Public pages don't need authentication check
-        if (isPublicRoute) {
-            return  //continue
-        }
+        if (!isActive) return
 
-        const data = await getCurrentUser()   //it calls GET /api/auth/me/
-        setUser(data)  
-      }
+        setUser(authData.user)
+        setOrganization(authData.organization)
+      } catch (error) {
+        if (!isActive) return
 
-      catch (error) {   //If /me fails  : 401 Unauthorized
         setUser(null)
-      } 
+        setOrganization(null)
 
-      finally {    //Whether /me succeeds or fails:
-        setLoading(false)
+        console.error("Authentication initialization failed:", error)
+      } finally {
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
-    initializeAuth() //call the async function to restore the logged-in user when the app starts.
-  }, [location.pathname])  //User goes to /login or /register -> Skip /me  and User goes to /dashboard or refreshes/dashboard -> Run /me 
 
+    initializeAuth()
 
-  //now we are using http only cookies to store the access and refresh tokens, so we don't need to store them in React state anymore.
-  //const [accessToken, setAccessToken] = useState(null)   //Stores the JWT access token.
-  //const [refreshToken, setRefreshToken] = useState(null)  //Stores the JWT refresh token
+    return () => {
+      isActive = false
+    }
+  }, [])
 
-  const login = (data) => {   //When Django successfully logs in the user, we store the returned data.
+  // Called after successful login.
+  const login = async (data) => {
+    setLoading(true)
+    setUser(data.user)
 
-    setUser(data.user)    // Store this user's information in React's global authentication state."when its navigates to otehr pages, it will know that the user is logged in."
-    //setAccessToken(data.access)   //Store the access token in React's global authentication state.
-    //setRefreshToken(data.refresh)  //Store the refresh token in React's global authentication state.
+    try {
+      const organizationData = await getCurrentOrganization()
+      setOrganization(organizationData)
+    } catch (error) {
+      console.error("Unable to fetch organization after login:", error)
+      setOrganization(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const logout = () => {  //clears authentication data.
+  // Clear authentication and organization state.
+  const logout = () => {
     setUser(null)
-    // setAccessToken(null)
-    // setRefreshToken(null)
+    setOrganization(null)
+    setLoading(false)
   }
 
-  const isAuthenticated = !!user  //isAuthenticated is true if user is not null, false if user is null. (!! converts a value to a boolean)
+  const isAuthenticated = !!user
 
   return (
     <AuthContext.Provider
-      value={{user,isAuthenticated,login,logout,loading}}
+      value={{
+        user,
+        organization,
+        isAuthenticated,
+        login,
+        logout,
+        loading,
+      }}
     >
-        {children}
+      {children}
     </AuthContext.Provider>
   )
 }
 
-
 export const useAuth = () => {
   return useContext(AuthContext)
 }
-
-//Instead of passing authentication data through props to every component, 
-
-// we store it centrally in AuthContext and access it wherever needed using useAuth().

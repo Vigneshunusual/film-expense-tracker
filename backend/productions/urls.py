@@ -1,15 +1,36 @@
 from django.urls import path
 
-from .views import (ProductionListCreateView,ProductionDetailView,ProductionArchiveView,ProductionMembershipCreateView,ProductionRestoreView)
+from .views import (
+    ProductionListCreateView,
+    ProductionDetailView,
+    ProductionArchiveView,
+    ProductionMembershipCreateView,
+    ProductionRestoreView,
+    ProductionActivateView,
+    ProductionCompleteView,
+)
+
 
 urlpatterns = [
-    path("",ProductionListCreateView.as_view(),name="production-list-create",),
-    path("<int:pk>/",ProductionDetailView.as_view(),name="production-detail",),
-    path("<int:pk>/archive/",ProductionArchiveView.as_view(),name="production-archive",),
-    path("<int:pk>/members/",ProductionMembershipCreateView.as_view(),name="production-membership-create",),
-    path("<int:pk>/restore/",ProductionRestoreView.as_view(),name="production-restore",),
-]
 
+    # Production listing and creation
+    path("",ProductionListCreateView.as_view(),name="production-list-create",),
+
+    # Production details and editing
+    path("<int:pk>/",ProductionDetailView.as_view(),name="production-detail",),
+
+    # Lifecycle actions
+    path("<int:pk>/activate/",ProductionActivateView.as_view(),name="production-activate",),
+
+    path("<int:pk>/complete/",ProductionCompleteView.as_view(),name="production-complete",),
+
+    path("<int:pk>/archive/",ProductionArchiveView.as_view(),name="production-archive",),
+
+    path("<int:pk>/restore/",ProductionRestoreView.as_view(),name="production-restore",),
+
+    # Retained backend functionality
+    path("<int:pk>/members/",ProductionMembershipCreateView.as_view(),name="production-membership-create",),
+]
 
 
 # This gives us:

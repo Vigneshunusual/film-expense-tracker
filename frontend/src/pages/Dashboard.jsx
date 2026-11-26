@@ -1,16 +1,16 @@
 
-import { useEffect } from "react"
+import { useState } from "react"
+
 import {
   Plus,
-  ArrowUpRight,
   TrendingUp,
   Wallet,
   Receipt,
   AlertCircle,
+  Search,
 } from "lucide-react"
 
 import { useAuth } from "../context/AuthContext"
-import { getCurrentOrganization } from "../services/authService"
 
 const summaryCards = [
   {
@@ -80,11 +80,17 @@ function ExpenseTrendChart() {
         viewBox="0 0 700 200"
         role="img"
         aria-label="Illustrative expense trend over seven shoot days"
-        className="h-[220px] w-full overflow-visible sm:h-[260px]"
+        className="h-[220px] w-full sm:h-[260px]"
         preserveAspectRatio="none"
       >
         <defs>
-          <linearGradient id="expenseFill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient
+            id="expenseFill"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
             <stop offset="0%" stopColor="#10b981" stopOpacity="0.42" />
             <stop offset="100%" stopColor="#10b981" stopOpacity="0.08" />
           </linearGradient>
@@ -105,11 +111,17 @@ function ExpenseTrendChart() {
       </svg>
 
       <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-        {["Day 19", "Day 20", "Day 21", "Day 22", "Day 23", "Day 24", "Day 25"].map(
-          (day) => (
-            <span key={day}>{day}</span>
-          )
-        )}
+        {[
+          "Day 19",
+          "Day 20",
+          "Day 21",
+          "Day 22",
+          "Day 23",
+          "Day 24",
+          "Day 25",
+        ].map((day) => (
+          <span key={day}>{day}</span>
+        ))}
       </div>
     </div>
   )
@@ -118,56 +130,85 @@ function ExpenseTrendChart() {
 function Dashboard() {
   const { user } = useAuth()
 
-  useEffect(() => {
-    const loadOrganization = async () => {
-      try {
-        const organization = await getCurrentOrganization()
-        console.log("Organization:", organization)
-      } catch (error) {
-        console.error("Organization request failed:", error)
-      }
-    }
+  const [searchQuery, setSearchQuery] = useState("")
 
-    loadOrganization()
-  }, [])
+  const filteredTransactions = transactions.filter((transaction) => {
+    const searchText = [
+      transaction.description,
+      transaction.department,
+      transaction.date,
+      transaction.shootDay,
+      transaction.amount,
+    ]
+      .join(" ")
+      .toLowerCase()
+
+    return searchText.includes(searchQuery.toLowerCase())
+  })
 
   return (
     <div className="min-h-full space-y-6 bg-background text-foreground">
-      {/* Page heading and actions */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+
+      {/* Professional Dashboard Header */}
+      <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+
+        {/* Heading */}
+        <div className="shrink-0">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Financial Dashboard
           </h1>
+
           <p className="mt-1 text-sm text-muted-foreground">
-            Shoot Day 25 · 16 September 2026
+            Monitor your production finances, budgets and vendor payments.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Search and Actions */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-3 xl:ml-8">
+
+          {/* Dashboard Search */}
+          <div className="relative w-full max-w-[270px] shrink-0">
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search dashboard transactions..."
+              aria-label="Search dashboard transactions"
+              className="h-11 w-full rounded-xl border border-input bg-background pl-10 pr-4 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+
+          {/* Vendor Payment */}
           <button
             type="button"
             disabled
-            title="Available when the Vendor Payments module is connected"
-            className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm font-medium opacity-80 sm:px-4"
+            title="Vendor Payments module is not connected yet"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium opacity-80"
           >
-            <Plus size={16} />
+            <Plus size={17} />
             Vendor Payment
           </button>
 
+          {/* Add Expense */}
           <button
             type="button"
             disabled
-            title="Available when the Expenses module is connected"
-            className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white opacity-80 sm:px-4"
+            title="Expenses module is not connected yet"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white opacity-80"
           >
-            <Plus size={16} />
+            <Plus size={17} />
             Add Expense
           </button>
-        </div>
-      </div>
 
-      {/* Financial summary cards */}
+        </div>
+      </section>
+
+      {/* Financial Summary Cards */}
       <section
         aria-label="Financial summary"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4"
@@ -179,16 +220,21 @@ function Dashboard() {
             <article
               key={card.title}
               className={`min-w-0 rounded-xl border bg-card p-4 sm:p-5 ${
-                index === 3 ? "border-amber-500/40" : "border-border"
+                index === 3
+                  ? "border-amber-500/40"
+                  : "border-border"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm text-muted-foreground">{card.title}</p>
-                <Icon size={17} className={card.color} />
+                <p className="text-sm text-muted-foreground">
+                  {card.title}
+                </p>
+
+                <Icon size={18} className={card.color} />
               </div>
 
               <p
-                className={`mt-2 break-words text-2xl font-bold tracking-tight sm:text-[28px] ${card.color}`}
+                className={`mt-3 break-words text-2xl font-bold tracking-tight sm:text-[28px] ${card.color}`}
               >
                 {card.amount}
               </p>
@@ -213,13 +259,16 @@ function Dashboard() {
         })}
       </section>
 
-      {/* Expense trend and department utilization */}
+      {/* Expense Trend and Department Utilization */}
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+
+        {/* Expense Trend */}
         <article className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-base font-semibold">
               Expense Trend (Last 7 Shoot Days)
             </h2>
+
             <span className="text-xs text-muted-foreground">
               Illustrative
             </span>
@@ -228,10 +277,16 @@ function Dashboard() {
           <ExpenseTrendChart />
         </article>
 
+        {/* Budget Utilization */}
         <article className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold">Budget Utilization</h2>
-            <span className="text-xs text-muted-foreground">By Dept</span>
+            <h2 className="text-base font-semibold">
+              Budget Utilization
+            </h2>
+
+            <span className="text-xs text-muted-foreground">
+              By Dept
+            </span>
           </div>
 
           <div className="mt-5 space-y-6">
@@ -243,6 +298,7 @@ function Dashboard() {
                 <div key={department.name}>
                   <div className="mb-2 flex items-center justify-between gap-3 text-sm">
                     <span>{department.name}</span>
+
                     <span
                       className={
                         isOverBudget
@@ -280,13 +336,23 @@ function Dashboard() {
         </article>
       </section>
 
-      {/* Recent transactions */}
+      {/* Recent Transactions */}
       <section className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-4 py-4 sm:px-5">
-          <h2 className="text-base font-semibold">Recent Transactions</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Illustrative entries — not live financial records
-          </p>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-4 sm:px-5">
+          <div>
+            <h2 className="text-base font-semibold">
+              Recent Transactions
+            </h2>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Latest production expenses and financial activity
+            </p>
+          </div>
+
+          <span className="text-xs text-muted-foreground">
+            {filteredTransactions.length} records
+          </span>
         </div>
 
         <div className="overflow-x-auto">
@@ -296,9 +362,11 @@ function Dashboard() {
                 <th className="px-4 py-3 font-medium sm:px-5">
                   Date / Context
                 </th>
+
                 <th className="px-4 py-3 font-medium sm:px-5">
                   Description
                 </th>
+
                 <th className="px-4 py-3 text-right font-medium sm:px-5">
                   Amount
                 </th>
@@ -306,39 +374,58 @@ function Dashboard() {
             </thead>
 
             <tbody>
-              {transactions.map((transaction, index) => (
-                <tr
-                  key={`${transaction.description}-${index}`}
-                  className="border-t border-border transition-colors hover:bg-accent/40"
-                >
-                  <td className="px-4 py-4 sm:px-5">
-                    <p className="font-medium">{transaction.date}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {transaction.shootDay}
-                    </p>
-                  </td>
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((transaction, index) => (
+                  <tr
+                    key={`${transaction.description}-${index}`}
+                    className="border-t border-border transition-colors hover:bg-accent/40"
+                  >
+                    <td className="px-4 py-4 sm:px-5">
+                      <p className="font-medium">
+                        {transaction.date}
+                      </p>
 
-                  <td className="px-4 py-4 sm:px-5">
-                    <p className="font-medium">{transaction.description}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Dept: {transaction.department}
-                    </p>
-                  </td>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {transaction.shootDay}
+                      </p>
+                    </td>
 
-                  <td className="px-4 py-4 text-right font-semibold sm:px-5">
-                    {transaction.amount}
+                    <td className="px-4 py-4 sm:px-5">
+                      <p className="font-medium">
+                        {transaction.description}
+                      </p>
+
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Dept: {transaction.department}
+                      </p>
+                    </td>
+
+                    <td className="px-4 py-4 text-right font-semibold sm:px-5">
+                      {transaction.amount}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="3"
+                    className="px-4 py-10 text-center text-sm text-muted-foreground"
+                  >
+                    No transactions match your search.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </section>
 
+      {/* Footer */}
       <p className="text-xs text-muted-foreground">
-        Signed in as {user?.first_name || user?.email || "User"}. Financial
-        figures shown above are sample values for layout development.
+        Signed in as {user?.email || "Authenticated User"}.
+        Financial figures are illustrative sample data.
       </p>
+
     </div>
   )
 }
