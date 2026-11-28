@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from .models import Production, ProductionMembership
-from accounts.models import OrganizationMembership
+from .models import Production
 
 
 class ProductionSerializer(serializers.ModelSerializer):
@@ -36,7 +35,6 @@ class ProductionSerializer(serializers.ModelSerializer):
         return value
 
     def validate_code(self, value):
-
         value = value.strip().upper()
 
         if not value:
@@ -104,65 +102,6 @@ class ProductionSerializer(serializers.ModelSerializer):
         if end_date and start_date and end_date < start_date:
             raise serializers.ValidationError({
                 "end_date": "End date cannot be before start date."
-            })
-
-        return attrs
-
-
-class ProductionMembershipSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ProductionMembership
-
-        fields = [
-            "id",
-            "user",
-            "production",
-            "role",
-            "created_at",
-        ]
-
-        read_only_fields = [
-            "id",
-            "production",
-            "created_at",
-        ]
-
-    def validate_user(self, user):
-
-        production = self.context["production"]
-
-        belongs_to_organization = OrganizationMembership.objects.filter(
-            organization=production.organization,
-            user=user,
-        ).exists()
-
-        if not belongs_to_organization:
-            raise serializers.ValidationError(
-                "This user does not belong to this organization's membership."
-            )
-
-        return user
-
-    def validate(self, attrs):
-
-        production = self.context["production"]
-
-        if production.status == Production.Status.ARCHIVED:
-            raise serializers.ValidationError(
-                "Cannot assign members to an archived production."
-            )
-
-        user = attrs["user"]
-
-        already_assigned = ProductionMembership.objects.filter(
-            production=production,
-            user=user,
-        ).exists()
-
-        if already_assigned:
-            raise serializers.ValidationError({
-                "user": "This user is already assigned to this production."
             })
 
         return attrs

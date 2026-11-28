@@ -4,7 +4,6 @@ from .views import (
     ProductionListCreateView,
     ProductionDetailView,
     ProductionArchiveView,
-    ProductionMembershipCreateView,
     ProductionRestoreView,
     ProductionActivateView,
     ProductionCompleteView,
@@ -28,8 +27,6 @@ urlpatterns = [
 
     path("<int:pk>/restore/",ProductionRestoreView.as_view(),name="production-restore",),
 
-    # Retained backend functionality
-    path("<int:pk>/members/",ProductionMembershipCreateView.as_view(),name="production-membership-create",),
 ]
 
 

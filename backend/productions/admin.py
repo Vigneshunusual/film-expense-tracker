@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Production, ProductionMembership
+from .models import Production
 
 
 @admin.register(Production)
@@ -22,24 +22,9 @@ class ProductionAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
         "code",
+        "organization__name",
     )
 
+    readonly_fields = ("created_at", "updated_at")
 
-@admin.register(ProductionMembership)
-class ProductionMembershipAdmin(admin.ModelAdmin):
-    list_display = (
-        "production",
-        "user",
-        "role",
-        "created_at",
-    )
 
-    list_filter = (
-        "role",
-        "production",
-    )
-
-    search_fields = (
-        "production__name",
-        "user__email",
-    )

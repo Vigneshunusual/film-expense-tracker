@@ -11,6 +11,9 @@ import {
   RefreshCw,
   Search,
   Eye,
+  Users,
+  UserPlus,
+  ChevronDown,
 } from "lucide-react"
 
 import {
@@ -20,6 +23,8 @@ import {
 
 import { useAuth } from "../../context/AuthContext"
 import CreateProductionModal from "./CreateProductionModal"
+
+
 
 const statusStyles = {
   PLANNED: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -68,13 +73,14 @@ const getErrorMessage = (error) => {
   return "Something went wrong while loading productions. Please try again."
 }
 
+
 function ProductionList() {
   const navigate = useNavigate()
 
   const { organization } = useAuth()
 
-  // Only organization Owners can create productions.
-  const canCreateProduction = organization?.role === "OWNER"
+  // Organization Owner permissions.
+  const isOwner = organization?.role === "OWNER"
 
   const [productions, setProductions] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -88,7 +94,11 @@ function ProductionList() {
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState("")
 
-  // Fetch productions from the backend.
+  // Organization invitation section state.
+  const [isInviteSectionOpen, setIsInviteSectionOpen] = useState(false)
+
+
+  // Fetch productions from backend.
   const fetchProductions = useCallback(async () => {
     setLoading(true)
     setError("")
@@ -96,7 +106,6 @@ function ProductionList() {
     try {
       const data = await getProductions()
 
-      // Support both paginated and non-paginated DRF responses.
       const productionList = Array.isArray(data)
         ? data
         : Array.isArray(data?.results)
@@ -116,11 +125,13 @@ function ProductionList() {
     }
   }, [])
 
+
   useEffect(() => {
     fetchProductions()
   }, [fetchProductions])
 
-  // Create a new production through the backend API.
+
+  // Create production.
   const handleCreateProduction = async (productionData) => {
     setCreating(true)
     setCreateError("")
@@ -130,7 +141,6 @@ function ProductionList() {
 
       setIsCreateModalOpen(false)
 
-      // Refresh the production list after successful creation.
       await fetchProductions()
 
       return true
@@ -162,6 +172,7 @@ function ProductionList() {
     }
   }
 
+
   // Search and status filtering.
   const filteredProductions = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -179,7 +190,8 @@ function ProductionList() {
     })
   }, [productions, searchQuery, selectedStatus])
 
-  // Calculate production overview statistics.
+
+  // Production statistics.
   const productionStats = useMemo(() => {
     return {
       total: productions.length,
@@ -197,6 +209,7 @@ function ProductionList() {
       ).length,
     }
   }, [productions])
+
 
   const overviewCards = [
     {
@@ -225,11 +238,13 @@ function ProductionList() {
     },
   ]
 
+
   return (
     <div className="min-h-full space-y-6">
 
-      {/* Page heading */}
+      {/* Page Heading */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
         <div>
           <div className="flex items-center gap-2">
             <Clapperboard size={23} className="text-primary" />
@@ -246,8 +261,8 @@ function ProductionList() {
 
         <div className="flex flex-wrap items-center gap-3">
 
-          {/* New Production button - Owner only */}
-          {canCreateProduction && (
+          {/* New Production - Owner Only */}
+          {isOwner && (
             <button
               type="button"
               onClick={() => {
@@ -261,7 +276,7 @@ function ProductionList() {
             </button>
           )}
 
-          {/* Refresh button */}
+          {/* Refresh */}
           <button
             type="button"
             onClick={fetchProductions}
@@ -275,8 +290,10 @@ function ProductionList() {
 
             Refresh
           </button>
+
         </div>
       </section>
+
 
       {/* Production Overview */}
       <section
@@ -292,6 +309,7 @@ function ProductionList() {
               className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
             >
               <div className="flex items-center justify-between gap-3">
+
                 <p className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </p>
@@ -299,6 +317,7 @@ function ProductionList() {
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon size={18} />
                 </div>
+
               </div>
 
               <p className="mt-4 text-3xl font-bold tracking-tight">
@@ -313,9 +332,93 @@ function ProductionList() {
         })}
       </section>
 
-      {/* Search and filters */}
+
+      {/* ORGANIZATION TEAM - OWNER ONLY */}
+      {isOwner && (
+        <section className="overflow-hidden rounded-xl border border-border bg-card">
+
+          {/* Section Header */}
+          <button
+            type="button"
+            onClick={() =>
+              setIsInviteSectionOpen((previous) => !previous)
+            }
+            aria-expanded={isInviteSectionOpen}
+            className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-accent/50"
+          >
+
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Users size={21} />
+              </div>
+
+              <div>
+                <h2 className="font-semibold tracking-tight">
+                  Organization Team
+                </h2>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Invite Managers and Accountants to your organization.
+                </p>
+              </div>
+
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+
+              <span className="hidden text-sm font-medium text-primary sm:block">
+                {isInviteSectionOpen ? "Close" : "Manage Team"}
+              </span>
+
+              <ChevronDown
+                size={19}
+                className={`text-muted-foreground transition-transform ${
+                  isInviteSectionOpen ? "rotate-180" : ""
+                }`}
+              />
+
+            </div>
+
+          </button>
+
+
+          {/* Expandable Invitation Form */}
+          {isInviteSectionOpen && (
+            <div className="border-t border-border bg-muted/20 p-5 sm:p-6">
+
+              <div className="mb-5 flex items-center gap-2">
+
+                <UserPlus
+                  size={19}
+                  className="text-primary"
+                />
+
+                <h3 className="font-semibold">
+                  Invite Organization User
+                </h3>
+
+              </div>
+
+              <InviteUserForm />
+
+              <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                Invitations are organization-wide. The invited user will
+                receive the role selected here after accepting the invitation.
+              </p>
+
+            </div>
+          )}
+
+        </section>
+      )}
+
+
+      {/* Search and Filters */}
       <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row">
+
         <div className="relative min-w-0 flex-1">
+
           <Search
             size={17}
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -329,6 +432,7 @@ function ProductionList() {
             aria-label="Search productions"
             className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
+
         </div>
 
         <select
@@ -343,11 +447,14 @@ function ProductionList() {
           <option value="COMPLETED">Completed</option>
           <option value="ARCHIVED">Archived</option>
         </select>
+
       </section>
 
-      {/* Production count */}
+
+      {/* Production Count */}
       {!loading && !error && (
         <div className="flex items-center justify-between">
+
           <p className="text-sm text-muted-foreground">
             Showing{" "}
             <span className="font-semibold text-foreground">
@@ -359,10 +466,12 @@ function ProductionList() {
             </span>{" "}
             productions
           </p>
+
         </div>
       )}
 
-      {/* Loading state */}
+
+      {/* Loading State */}
       {loading && (
         <section
           aria-label="Loading productions"
@@ -382,12 +491,14 @@ function ProductionList() {
         </section>
       )}
 
-      {/* Error state */}
+
+      {/* Error State */}
       {!loading && error && (
         <section
           role="alert"
           className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center"
         >
+
           <AlertCircle
             size={30}
             className="mx-auto text-destructive"
@@ -409,12 +520,15 @@ function ProductionList() {
             <RefreshCw size={15} />
             Try again
           </button>
+
         </section>
       )}
 
-      {/* Empty state */}
+
+      {/* Empty State */}
       {!loading && !error && productions.length === 0 && (
         <section className="rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
+
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
             <FolderOpen size={27} className="text-muted-foreground" />
           </div>
@@ -427,15 +541,18 @@ function ProductionList() {
             Your organization does not have any productions available yet.
             Productions will appear here once they are created.
           </p>
+
         </section>
       )}
 
-      {/* No search results */}
+
+      {/* No Search Results */}
       {!loading &&
         !error &&
         productions.length > 0 &&
         filteredProductions.length === 0 && (
           <section className="rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center">
+
             <Search
               size={27}
               className="mx-auto text-muted-foreground"
@@ -459,27 +576,34 @@ function ProductionList() {
             >
               Clear filters
             </button>
+
           </section>
         )}
 
-      {/* Production cards */}
+
+      {/* Production Cards */}
       {!loading && !error && filteredProductions.length > 0 && (
         <section
           aria-label="Production list"
           className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
         >
+
           {filteredProductions.map((production) => (
             <article
               key={production.id}
               className="group min-w-0 rounded-xl border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
             >
+
               <div className="flex items-start justify-between gap-3">
+
                 <div className="flex min-w-0 items-center gap-3">
+
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Clapperboard size={21} />
                   </div>
 
                   <div className="min-w-0">
+
                     <h2 className="truncate font-semibold tracking-tight">
                       {production.name}
                     </h2>
@@ -487,7 +611,9 @@ function ProductionList() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       Code: {production.code}
                     </p>
+
                   </div>
+
                 </div>
 
                 <span
@@ -498,11 +624,15 @@ function ProductionList() {
                 >
                   {formatStatus(production.status)}
                 </span>
+
               </div>
 
-              {/* Production dates */}
+
+              {/* Production Dates */}
               <div className="mt-6 space-y-3 border-t border-border pt-4">
+
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+
                   <CalendarDays size={16} />
 
                   <span>Start date</span>
@@ -510,9 +640,11 @@ function ProductionList() {
                   <span className="ml-auto font-medium text-foreground">
                     {formatDate(production.start_date)}
                   </span>
+
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+
                   <CalendarDays size={16} />
 
                   <span>End date</span>
@@ -520,11 +652,15 @@ function ProductionList() {
                   <span className="ml-auto font-medium text-foreground">
                     {formatDate(production.end_date)}
                   </span>
+
                 </div>
+
               </div>
+
 
               {/* View Details */}
               <div className="mt-5 border-t border-border pt-4">
+
                 <button
                   type="button"
                   onClick={() =>
@@ -535,11 +671,15 @@ function ProductionList() {
                   <Eye size={16} />
                   View Details
                 </button>
+
               </div>
+
             </article>
           ))}
+
         </section>
       )}
+
 
       {/* Create Production Modal */}
       <CreateProductionModal

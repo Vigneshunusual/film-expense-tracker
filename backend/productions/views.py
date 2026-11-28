@@ -8,10 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 
 from .models import Production
-from .serializers import (
-    ProductionSerializer,
-    ProductionMembershipSerializer,
-)
+from .serializers import ProductionSerializer
 
 from .permissions import (
     CanAccessProduction,
@@ -27,7 +24,6 @@ class ProductionListCreateView(generics.ListCreateAPIView):
     serializer_class = ProductionSerializer
 
     def get_permissions(self):
-
         if self.request.method == "POST":
             return [
                 IsAuthenticated(),
@@ -37,27 +33,13 @@ class ProductionListCreateView(generics.ListCreateAPIView):
         return [IsAuthenticated()]
 
     def get_queryset(self):
-
-        user = self.request.user
-        membership = user.organization_memberships
-
-        if membership.role in [
-            "OWNER",
-            "ACCOUNTANT",
-            "MANAGER",
-        ]:
-
-            return Production.objects.filter(
-                organization=membership.organization
-            )
+        membership = self.request.user.organization_memberships
 
         return Production.objects.filter(
-            organization=membership.organization,
-            memberships__user=user,
-        ).distinct()
+            organization=membership.organization
+        )
 
     def perform_create(self, serializer):
-
         serializer.save(
             organization=self.request.user
             .organization_memberships.organization
@@ -69,7 +51,6 @@ class ProductionDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ProductionSerializer
 
     def get_permissions(self):
-
         if self.request.method in ["PUT", "PATCH"]:
             return [
                 IsAuthenticated(),
@@ -83,24 +64,11 @@ class ProductionDetailView(generics.RetrieveUpdateAPIView):
         ]
 
     def get_queryset(self):
-
-        user = self.request.user
-        membership = user.organization_memberships
-
-        if membership.role in [
-            "OWNER",
-            "ACCOUNTANT",
-            "MANAGER",
-        ]:
-
-            return Production.objects.filter(
-                organization=membership.organization
-            )
+        membership = self.request.user.organization_memberships
 
         return Production.objects.filter(
-            organization=membership.organization,
-            memberships__user=user,
-        ).distinct()
+            organization=membership.organization
+        )
 
 
 # --------------------------------------------------
@@ -111,7 +79,7 @@ class ProductionLifecycleView(APIView):
 
     permission_classes = [
         IsAuthenticated,
-        CanEditProduction,
+        IsProductionOwner,
     ]
 
     expected_status = None
@@ -131,7 +99,6 @@ class ProductionLifecycleView(APIView):
             )
 
             if production.status != self.expected_status:
-
                 raise ValidationError({
                     "detail": (
                         f"This action is only allowed for "
@@ -248,59 +215,3 @@ class ProductionRestoreView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
-
-# --------------------------------------------------
-# PRODUCTION MEMBERSHIP
-# Deferred from V1 frontend, retained in backend.
-# --------------------------------------------------
-
-class ProductionMembershipCreateView(generics.CreateAPIView):
-
-    serializer_class = ProductionMembershipSerializer
-
-    permission_classes = [
-        IsAuthenticated,
-        IsProductionOwner,
-    ]
-
-    def get_serializer_context(self):
-
-        context = super().get_serializer_context()
-
-        production = get_object_or_404(
-            Production,
-            pk=self.kwargs["pk"],
-            organization=self.request.user
-            .organization_memberships.organization,
-        )
-
-        context["production"] = production
-
-        return context
-
-    def perform_create(self, serializer):
-
-        production = serializer.context["production"]
-
-        if production.status in [
-            Production.Status.ARCHIVED,
-            Production.Status.COMPLETED,
-        ]:
-            raise ValidationError(
-                "Cannot assign members to a completed or archived production."
-            )
-
-        serializer.save(production=production)
-
-# internall CreatAPIView   just for understand purpose:
-# def create(self, request, *args, **kwargs):  #DRF's built-in method that manages the overall creation process.
-#     serializer = self.get_serializer(data=request.data)     =>serializer = ProductionMembershipSerializer(data=request.data)
-#     serializer.is_valid(raise_exception=True)
-#     self.perform_create(serializer)
-#     headers = self.get_success_headers(seriaizer.data)
-#     return Response(
-#         serializer.data,
-#         status=201,
-#         headers=headers
-#     )

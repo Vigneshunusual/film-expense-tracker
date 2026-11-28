@@ -35,32 +35,3 @@ class Production(models.Model):   #This creates a Django model named Production.
         return f"{self.name} ({self.code})"  #Django displays a production as text.  : Film ABC (ABC001)
 
 
-
-#This model records which user is assigned to which production and what their production-specific role is.
-class ProductionMembership(models.Model):
-
-    class Role(models.TextChoices):
-        DIRECTOR = "DIRECTOR", "Director"
-        PRODUCTION_MANAGER = "PRODUCTION_MANAGER", "Production Manager"
-        STAFF = "STAFF", "Staff"    
-
-    user = models.ForeignKey("accounts.User",on_delete=models.CASCADE,related_name="production_memberships",)
-                                #acc.user=>It is a string reference to the model. Django can resolve it without requiring a direct import of the User model in this file.
-    production = models.ForeignKey(Production,on_delete=models.CASCADE, related_name="memberships")
-    role = models.CharField(max_length=30,choices=Role.choices,)
-        # User: Arun
-        # Production: Film ABC
-        # Role: DIRECTOR
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(   #This means the same user cannot have two separate membership records for the same production.
-                fields=["production", "user"],
-                name="unique_user_per_production",
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.user.email} - {self.production.name} ({self.role})"  #Displays the assignment in readable form.
-                    #arun@example.com - Film ABC (DIRECTOR)

@@ -1,427 +1,69 @@
+// File	Responsibility
+// Dashboard.jsx	Combines all dashboard components
+// DashboardHeader.jsx	Title, search and action buttons
+// FinancialSummary.jsx	Displays four financial cards
+// SummaryCard.jsx	Reusable individual card
+// ExpenseTrendChart.jsx	Expense trend chart
+// BudgetUtilization.jsx	Department budget progress
+// RecentTransactions.jsx	Recent financial transactions
+// dashboardData.js	Dashboard display data
+// Dashboard.css	Dashboard styling and responsiveness
+
+
+// It only connects the components.
 
 import { useState } from "react"
 
-import {
-  Plus,
-  TrendingUp,
-  Wallet,
-  Receipt,
-  AlertCircle,
-  Search,
-} from "lucide-react"
-
 import { useAuth } from "../context/AuthContext"
 
-const summaryCards = [
-  {
-    title: "Total Planned Budget",
-    amount: "₹5,00,00,000",
-    note: "V2 - Finalized",
-    icon: Wallet,
-    color: "text-foreground",
-  },
-  {
-    title: "Actual Expenses",
-    amount: "₹1,20,00,000",
-    note: "24% of total budget",
-    icon: Receipt,
-    color: "text-emerald-500",
-  },
-  {
-    title: "Budget Remaining",
-    amount: "₹3,80,00,000",
-    note: "76% of budget remaining",
-    icon: TrendingUp,
-    color: "text-foreground",
-  },
-  {
-    title: "Pending Vendor Dues",
-    amount: "₹15,50,000",
-    note: "View 5 pending settlements",
-    icon: AlertCircle,
-    color: "text-amber-500",
-  },
-]
+import DashboardHeader from "../components/dashboard/DashboardHeader"
 
-const departments = [
-  { name: "Camera & DOP", percentage: 85, color: "bg-amber-500" },
-  { name: "Location", percentage: 45, color: "bg-emerald-500" },
-  { name: "Food & Catering", percentage: 110, color: "bg-red-500" },
-]
+import FinancialSummary from "../components/dashboard/FinancialSummary"
 
-const transactions = [
-  {
-    date: "Today",
-    shootDay: "Shoot Day 25",
-    description: "Crew Lunch & Dinner",
-    department: "Food",
-    amount: "₹50,000",
-  },
-  {
-    date: "Yesterday",
-    shootDay: "Shoot Day 24",
-    description: "Camera Equipment Rental",
-    department: "Camera & DOP",
-    amount: "₹1,25,000",
-  },
-  {
-    date: "Yesterday",
-    shootDay: "Shoot Day 24",
-    description: "Location Advance",
-    department: "Location",
-    amount: "₹75,000",
-  },
-]
+import ExpenseTrendChart from "../components/dashboard/ExpenseTrendChart"
 
-function ExpenseTrendChart() {
-  return (
-    <div className="mt-5 w-full">
-      <svg
-        viewBox="0 0 700 200"
-        role="img"
-        aria-label="Illustrative expense trend over seven shoot days"
-        className="h-[220px] w-full sm:h-[260px]"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient
-            id="expenseFill"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.42" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0.08" />
-          </linearGradient>
-        </defs>
+import BudgetUtilization from "../components/dashboard/BudgetUtilization"
 
-        <path
-          d="M0 165 C55 145 80 100 130 115 S205 170 260 120 S340 55 390 35 S470 20 500 85 S540 210 580 195 S650 65 700 30 L700 200 L0 200 Z"
-          fill="url(#expenseFill)"
-        />
+import RecentTransactions from "../components/dashboard/RecentTransactions"
 
-        <path
-          d="M0 165 C55 145 80 100 130 115 S205 170 260 120 S340 55 390 35 S470 20 500 85 S540 210 580 195 S650 65 700 30"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="2.5"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-
-      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
-        {[
-          "Day 19",
-          "Day 20",
-          "Day 21",
-          "Day 22",
-          "Day 23",
-          "Day 24",
-          "Day 25",
-        ].map((day) => (
-          <span key={day}>{day}</span>
-        ))}
-      </div>
-    </div>
-  )
-}
+import "../components/dashboard/Dashboard.css"
 
 function Dashboard() {
-  const { user } = useAuth()
+  
 
+  const { user } = useAuth()
+  const userName = user?.first_name || user?.username || user?.email?.split("@")[0] || "there"
   const [searchQuery, setSearchQuery] = useState("")
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    const searchText = [
-      transaction.description,
-      transaction.department,
-      transaction.date,
-      transaction.shootDay,
-      transaction.amount,
-    ]
-      .join(" ")
-      .toLowerCase()
-
-    return searchText.includes(searchQuery.toLowerCase())
-  })
-
   return (
-    <div className="min-h-full space-y-6 bg-background text-foreground">
+    <div className="dashboard-page">
 
-      {/* Professional Dashboard Header */}
-      <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+      {/* Dashboard Header */}
+      <DashboardHeader
+        userName={userName}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
 
-        {/* Heading */}
-        <div className="shrink-0">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Financial Dashboard
-          </h1>
+      {/* Financial Summary */}
+      <FinancialSummary />
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Monitor your production finances, budgets and vendor payments.
-          </p>
-        </div>
+      {/* Charts */}
+      <section className="dashboard-charts">
 
-        {/* Search and Actions */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3 xl:ml-8">
+        <ExpenseTrendChart />
 
-          {/* Dashboard Search */}
-          <div className="relative w-full max-w-[270px] shrink-0">
-            <Search
-              size={17}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
+        <BudgetUtilization />
 
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search dashboard transactions..."
-              aria-label="Search dashboard transactions"
-              className="h-11 w-full rounded-xl border border-input bg-background pl-10 pr-4 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
-
-          {/* Vendor Payment */}
-          <button
-            type="button"
-            disabled
-            title="Vendor Payments module is not connected yet"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium opacity-80"
-          >
-            <Plus size={17} />
-            Vendor Payment
-          </button>
-
-          {/* Add Expense */}
-          <button
-            type="button"
-            disabled
-            title="Expenses module is not connected yet"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white opacity-80"
-          >
-            <Plus size={17} />
-            Add Expense
-          </button>
-
-        </div>
-      </section>
-
-      {/* Financial Summary Cards */}
-      <section
-        aria-label="Financial summary"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4"
-      >
-        {summaryCards.map((card, index) => {
-          const Icon = card.icon
-
-          return (
-            <article
-              key={card.title}
-              className={`min-w-0 rounded-xl border bg-card p-4 sm:p-5 ${
-                index === 3
-                  ? "border-amber-500/40"
-                  : "border-border"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm text-muted-foreground">
-                  {card.title}
-                </p>
-
-                <Icon size={18} className={card.color} />
-              </div>
-
-              <p
-                className={`mt-3 break-words text-2xl font-bold tracking-tight sm:text-[28px] ${card.color}`}
-              >
-                {card.amount}
-              </p>
-
-              <p
-                className={`mt-2 text-xs ${
-                  index === 3
-                    ? "text-amber-500"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {card.note}
-              </p>
-
-              {index === 2 && (
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full w-[24%] rounded-full bg-emerald-500" />
-                </div>
-              )}
-            </article>
-          )
-        })}
-      </section>
-
-      {/* Expense Trend and Department Utilization */}
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-
-        {/* Expense Trend */}
-        <article className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-base font-semibold">
-              Expense Trend (Last 7 Shoot Days)
-            </h2>
-
-            <span className="text-xs text-muted-foreground">
-              Illustrative
-            </span>
-          </div>
-
-          <ExpenseTrendChart />
-        </article>
-
-        {/* Budget Utilization */}
-        <article className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold">
-              Budget Utilization
-            </h2>
-
-            <span className="text-xs text-muted-foreground">
-              By Dept
-            </span>
-          </div>
-
-          <div className="mt-5 space-y-6">
-            {departments.map((department) => {
-              const isOverBudget = department.percentage > 100
-              const barWidth = Math.min(department.percentage, 100)
-
-              return (
-                <div key={department.name}>
-                  <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                    <span>{department.name}</span>
-
-                    <span
-                      className={
-                        isOverBudget
-                          ? "font-semibold text-red-500"
-                          : "font-semibold"
-                      }
-                    >
-                      {department.percentage}%
-                    </span>
-                  </div>
-
-                  <div
-                    className="h-2 overflow-hidden rounded-full bg-muted"
-                    role="progressbar"
-                    aria-label={`${department.name} budget utilization`}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={barWidth}
-                  >
-                    <div
-                      className={`h-full rounded-full ${department.color}`}
-                      style={{ width: `${barWidth}%` }}
-                    />
-                  </div>
-
-                  {isOverBudget && (
-                    <p className="mt-1 text-xs text-red-500">
-                      Budget exceeded
-                    </p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </article>
       </section>
 
       {/* Recent Transactions */}
-      <section className="overflow-hidden rounded-xl border border-border bg-card">
-
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-4 sm:px-5">
-          <div>
-            <h2 className="text-base font-semibold">
-              Recent Transactions
-            </h2>
-
-            <p className="mt-1 text-xs text-muted-foreground">
-              Latest production expenses and financial activity
-            </p>
-          </div>
-
-          <span className="text-xs text-muted-foreground">
-            {filteredTransactions.length} records
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px] text-left text-sm">
-            <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium sm:px-5">
-                  Date / Context
-                </th>
-
-                <th className="px-4 py-3 font-medium sm:px-5">
-                  Description
-                </th>
-
-                <th className="px-4 py-3 text-right font-medium sm:px-5">
-                  Amount
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction, index) => (
-                  <tr
-                    key={`${transaction.description}-${index}`}
-                    className="border-t border-border transition-colors hover:bg-accent/40"
-                  >
-                    <td className="px-4 py-4 sm:px-5">
-                      <p className="font-medium">
-                        {transaction.date}
-                      </p>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {transaction.shootDay}
-                      </p>
-                    </td>
-
-                    <td className="px-4 py-4 sm:px-5">
-                      <p className="font-medium">
-                        {transaction.description}
-                      </p>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Dept: {transaction.department}
-                      </p>
-                    </td>
-
-                    <td className="px-4 py-4 text-right font-semibold sm:px-5">
-                      {transaction.amount}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="3"
-                    className="px-4 py-10 text-center text-sm text-muted-foreground"
-                  >
-                    No transactions match your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <RecentTransactions
+        searchQuery={searchQuery}
+      />
 
       {/* Footer */}
-      <p className="text-xs text-muted-foreground">
+      <p className="dashboard-footer">
         Signed in as {user?.email || "Authenticated User"}.
         Financial figures are illustrative sample data.
       </p>

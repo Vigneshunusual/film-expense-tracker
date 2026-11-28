@@ -1,56 +1,95 @@
 from rest_framework.permissions import BasePermission
 
-from accounts.models import OrganizationMembership
-from .models import ProductionMembership
+
+def get_membership(user):
+    if not user.is_authenticated:
+        return None
+
+    try:
+        return user.organization_memberships
+    except Exception:
+        return None
 
 
-class CanAccessProduction(BasePermission):   #“Can this user access this Production?
+class CanAccessProduction(BasePermission):
+    """All organization roles can access their organization's productions."""
 
     def has_object_permission(self, request, view, obj):
-        membership = request.user.organization_memberships   # (membership.role = OWNER / MANAGER / ACCOUNTANT / MEMBER)
+        membership = get_membership(request.user)
 
-        # Organization-wide access
-        if membership.role in [
-            OrganizationMembership.Role.OWNER, 
-            OrganizationMembership.Role.ACCOUNTANT,
-            OrganizationMembership.Role.MANAGER,
-        ]:   
-            return True
-
-        # Production-specific access
-             #Is the currently logged-in user assigned to this production?
-        return ProductionMembership.objects.filter(
-            production=obj,    #Find a ProductionMembership for Film ABC.  (obj is the Production currently being accessed.)
-            user=request.user,  #is the currently logged-in user.
-        ).exists()
+        return (
+            membership is not None
+            and membership.organization_id == obj.organization_id
+            and membership.role in [
+                "OWNER",
+                "MANAGER",
+                "ACCOUNTANT",
+            ]
+        )
 
 
-class IsProductionOwner(BasePermission):  #“Is the currently logged-in user the OWNER of the organization?”
-   
-    def has_permission(self, request, view):
-        membership = request.user.organization_memberships
-
-        return membership.role == "OWNER"
-
-
-class CanArchiveProduction(BasePermission):  #“Is the currently logged-in user the OWNER?” IF YEs => Allow ARCHIVE
+class IsProductionOwner(BasePermission):
+    """Only the organization Owner can create productions."""
 
     def has_permission(self, request, view):
-        membership = request.user.organization_memberships
+        membership = get_membership(request.user)
 
-        return membership.role == "OWNER"
+        return (
+            membership is not None
+            and membership.role == "OWNER"
+        )
+
 
 class CanEditProduction(BasePermission):
+    """Owner and Manager can edit production details."""
+
+    def has_object_permission(self, request, view, obj):
+        membership = get_membership(request.user)
+
+        return (
+            membership is not None
+            and membership.organization_id == obj.organization_id
+            and membership.role in ["OWNER", "MANAGER"]
+        )
+
+
+class CanArchiveProduction(BasePermission):
+    """Only Owner can archive productions."""
 
     def has_permission(self, request, view):
-        membership = request.user.organization_memberships
+        membership = get_membership(request.user)
 
-        return membership.role in [
-            OrganizationMembership.Role.OWNER,
-            OrganizationMembership.Role.MANAGER,
-        ]
+        return (
+            membership is not None
+            and membership.role == "OWNER"
+        )
+
+    def has_object_permission(self, request, view, obj):
+        membership = get_membership(request.user)
+
+        return (
+            membership is not None
+            and membership.organization_id == obj.organization_id
+            and membership.role == "OWNER"
+        )
+
 
 class CanRestoreProduction(BasePermission):
+    """Only Owner can restore productions."""
+
     def has_permission(self, request, view):
-        membership = request.user.organization_memberships
-        return membership.role == "OWNER"
+        membership = get_membership(request.user)
+
+        return (
+            membership is not None
+            and membership.role == "OWNER"
+        )
+
+    def has_object_permission(self, request, view, obj):
+        membership = get_membership(request.user)
+
+        return (
+            membership is not None
+            and membership.organization_id == obj.organization_id
+            and membership.role == "OWNER"
+        )

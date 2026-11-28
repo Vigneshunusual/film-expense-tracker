@@ -27,11 +27,11 @@ class OrganizationMembership(models.Model):
         OWNER = 'OWNER', 'Owner'     #owner
         MANAGER = 'MANAGER', 'Manager'
         ACCOUNTANT = 'ACCOUNTANT', 'Accountant'
-        MEMBER = 'MEMBER', 'Member'
+        
 
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='organization_memberships')
     organization = models.ForeignKey(Organization,on_delete=models.CASCADE,related_name='memberships')
-    role = models.CharField(max_length=20,choices=Role.choices,default=Role.MEMBER)
+    role = models.CharField(max_length=20,choices=Role.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -65,7 +65,9 @@ class OrganizationInvitation(models.Model):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150,blank=True)
     token = models.UUIDField(default=uuid.uuid4,unique=True,editable=False)  #This is the unique invitation identifier.
-    role = models.CharField(max_length=20,choices=OrganizationMembership.Role.choices,default=OrganizationMembership.Role.MEMBER)   #When Nishok invites someone, he can specify their organization role.
+    role = models.CharField(max_length=20,choices=[
+        (OrganizationMembership.Role.MANAGER, "Manager"),
+        (OrganizationMembership.Role.ACCOUNTANT, "Accountant"),])   #When Nishok invites someone, he can specify their organization role.
     status = models.CharField(max_length=20,choices=Status.choices,default=Status.PENDING)
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)

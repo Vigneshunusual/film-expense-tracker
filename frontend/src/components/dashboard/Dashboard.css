@@ -1,0 +1,678 @@
+/* =========================================
+   1. DASHBOARD PAGE
+========================================= */
+
+.dashboard-page {
+  min-height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+
+/* =========================================
+   2. DASHBOARD HEADER
+========================================= */
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.dashboard-heading {
+  min-width: 0;
+}
+
+.dashboard-heading h1 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+.dashboard-heading p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.dashboard-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dashboard-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--input);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.dashboard-search svg {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.dashboard-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+.dashboard-search input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.dashboard-action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.vendor-payment-button,
+.add-expense-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.vendor-payment-button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.add-expense-button {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: white;
+}
+
+.vendor-payment-button:disabled,
+.add-expense-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+
+/* =========================================
+   3. FINANCIAL SUMMARY
+========================================= */
+
+.financial-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.summary-card.warning {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summary-card-title {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.summary-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.summary-card.success .summary-card-icon,
+.summary-card.success .summary-card-amount {
+  color: #10b981;
+}
+
+.summary-card.warning .summary-card-icon,
+.summary-card.warning .summary-card-amount {
+  color: #f59e0b;
+}
+
+.summary-card-amount {
+  margin-top: 14px;
+  font-size: clamp(15px, 4.5vw, 23px);
+  font-weight: 700;
+  letter-spacing: -0.7px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+.summary-card-note {
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.summary-card.warning .summary-card-note {
+  color: #f59e0b;
+}
+
+.summary-progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--muted);
+}
+
+.summary-progress-fill {
+  width: 76%;
+  height: 100%;
+  border-radius: 20px;
+  background: #10b981;
+}
+
+
+/* =========================================
+   4. DASHBOARD CHARTS
+========================================= */
+
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  min-width: 0;
+}
+
+.dashboard-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.panel-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.panel-header span {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+
+/* =========================================
+   5. EXPENSE TREND CHART
+========================================= */
+
+.expense-chart {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.expense-chart svg {
+  display: block;
+  width: 100%;
+  height: 190px;
+}
+
+.chart-days {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+
+/* =========================================
+   6. BUDGET UTILIZATION
+========================================= */
+
+.department-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 22px;
+}
+
+.department-item {
+  min-width: 0;
+}
+
+.department-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+
+.department-info strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.department-info .over-budget {
+  color: #ef4444;
+}
+
+.department-progress {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--muted);
+}
+
+.department-progress-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: #10b981;
+}
+
+.department-progress-fill.danger {
+  background: #ef4444;
+}
+
+.budget-warning {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #ef4444;
+}
+
+
+/* =========================================
+   7. RECENT TRANSACTIONS
+========================================= */
+
+.transactions-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.transactions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.transactions-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.transactions-header p {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.transactions-header > span {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+
+/* Mobile transaction cards */
+
+.mobile-transactions {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-transaction-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-transaction-card:last-child {
+  border-bottom: none;
+}
+
+.mobile-transaction-card > div {
+  min-width: 0;
+}
+
+.mobile-transaction-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mobile-transaction-card p {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.mobile-transaction-card span {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.mobile-transaction-card strong {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* Desktop transaction table */
+
+.desktop-transactions {
+  display: none;
+  overflow-x: auto;
+}
+
+.desktop-transactions table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.desktop-transactions thead {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.desktop-transactions th {
+  padding: 14px 20px;
+  font-weight: 500;
+}
+
+.desktop-transactions th:last-child {
+  text-align: right;
+}
+
+.desktop-transactions td {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.desktop-transactions td strong,
+.desktop-transactions td span {
+  display: block;
+}
+
+.desktop-transactions td strong {
+  font-weight: 600;
+}
+
+.desktop-transactions td span {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.desktop-transactions tbody tr:hover {
+  background: var(--muted);
+}
+
+.desktop-transactions .transaction-amount {
+  text-align: right;
+  font-weight: 600;
+}
+
+.no-transactions {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+
+/* =========================================
+   8. DASHBOARD FOOTER
+========================================= */
+
+.dashboard-footer {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+
+/* =========================================
+   9. TABLET - 640px AND ABOVE
+========================================= */
+
+@media (min-width: 640px) {
+    
+
+
+  .dashboard-page {
+    gap: 24px;
+  }
+
+  .dashboard-heading h1 {
+    font-size: 30px;
+  }
+
+  .dashboard-header-actions {
+    gap: 12px;
+  }
+
+  .dashboard-action-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  .vendor-payment-button,
+  .add-expense-button {
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .summary-card {
+    padding: 20px;
+  }
+
+  .summary-card-title {
+    font-size: 14px;
+  }
+
+  .summary-card-amount {
+    margin-top: 16px;
+    font-size: 28px;
+  }
+
+  .summary-card-note {
+    font-size: 12px;
+  }
+
+  .dashboard-panel {
+    padding: 20px;
+  }
+
+  .panel-header h2 {
+    font-size: 16px;
+  }
+
+  .expense-chart svg {
+    height: 260px;
+  }
+
+  .chart-days {
+    font-size: 12px;
+  }
+
+  .transactions-header {
+    padding: 16px 20px;
+  }
+
+  .mobile-transactions {
+    display: none;
+  }
+
+  .desktop-transactions {
+    display: block;
+  }
+
+}
+
+
+/* =========================================
+   10. LAPTOP - 1280px AND ABOVE
+========================================= */
+
+@media (min-width: 1280px) {
+
+  .dashboard-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dashboard-header-actions {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 32px;
+  }
+
+  .dashboard-search {
+    max-width: 270px;
+    flex-shrink: 0;
+  }
+
+  .dashboard-charts {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  }
+
+}
+
+
+/* =========================================
+   11. LARGE LAPTOP / DESKTOP
+========================================= */
+
+@media (min-width: 1536px) {
+
+  .financial-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================
+   12. SMALL MOBILE - 380px AND BELOW
+========================================= */
+
+@media (max-width: 380px) {
+
+  .dashboard-heading h1 {
+    font-size: 23px;
+  }
+
+  .financial-summary {
+    gap: 10px;
+  }
+
+  .summary-card {
+    padding: 12px;
+  }
+
+  .summary-card-title {
+    font-size: 11px;
+  }
+
+  .summary-card-note {
+    font-size: 10px;
+  }
+
+  .summary-card-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .vendor-payment-button,
+  .add-expense-button {
+    gap: 5px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+}
